@@ -368,6 +368,211 @@ a:hover {
   /* остальной ваш grid-CSS */
 }
 
-.quickadd-footer {
-  /* ваш CSS для футера */
+/* ============= Общие стили ============= */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
+body,
+html {
+  height: 100%;
+  font-family: "Segoe UI", Roboto, sans-serif;
+  background-color: #0f0f1a;
+  color: #e0e0e0;
+  overflow: hidden;
+}
+.app {
+  display: flex;
+  height: 100%;
+}
+
+/* ============= Sidebar ============= */
+.sidebar {
+  width: 240px;
+  background: #1e1e2e;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+}
+
+.sidebar-top {
+  margin-bottom: 32px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  margin-bottom: 16px;
+}
+.logo img {
+  width: 32px;
+  height: 32px;
+  margin-right: 8px;
+}
+.logo-text {
+  font-size: 16px;
+  font-weight: bold;
+  color: #fff;
+}
+.beta {
+  font-size: 10px;
+  background: #333;
+  padding: 2px 4px;
+  border-radius: 4px;
+  margin-left: auto;
+  color: #ccc;
+}
+
+.sidebar-controls {
+  display: flex;
+  align-items: center;
+}
+.sidebar-controls button,
+.sidebar-controls select {
+  background: #2b2b3b;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 8px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.sidebar-controls select {
+  margin-left: 8px;
+}
+
+.nav-primary ul,
+.nav-community ul {
+  list-style: none;
+}
+.nav-primary li a,
+.nav-community li a {
+  display: block;
+  color: #e0e0e0;
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: background 0.2s;
+}
+.nav-primary li a:hover,
+.nav-community li a:hover {
+  background: #2b2b3b;
+}
+
+.nav-community {
+  margin-top: 24px;
+}
+.nav-community h3 {
+  font-size: 12px;
+  color: #888;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.current-build {
+  margin-top: auto;
+  border-top: 1px solid #333;
+  padding-top: 16px;
+}
+.current-build h3 {
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 8px;
+}
+.current-build-info {
+  background: #2b2b3b;
+  border-radius: 4px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+}
+.current-build-info span {
+  font-size: 14px;
+}
+#current-build-name {
+  margin-bottom: 4px;
+}
+
+.sidebar-footer {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+#signup-btn,
+#login-link {
+  text-align: center;
+  padding: 8px;
+  border-radius: 4px;
+  font-size: 14px;
+  text-decoration: none;
+}
+#signup-btn {
+  background: #a259ff;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  margin-bottom: 8px;
+}
+#login-link {
+  color: #888;
+  background: none;
+}
+#login-link:hover {
+  color: #fff;
+}
+
+/* ============= Main ============= */
+.main {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.build-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+.build-header-left {
+  display: flex;
+  align-items: center;
+}
+.build-header-left > * {
+  margin-right: 12px;
+}
+#new-build {
+  background: none;
+  border: none;
+  color: #88aaff;
+  font-size: 14px;
+  cursor: pointer;
+}
+#build-selector {
+  background: #2b2b3b;
+  border: none;
+  color: #fff;
+  padding: 6px 8px;
+  border-radius: 4px;
+  font-size: 14px;
+}
+#build-name {
+  font-size: 24px;
+  color: #fff;
+  outline: none;
+  min-width: 200px;
+  cursor: text;
+}
+
+.build-header-right #totalPrice {
+  font-size: 18px;
+  font-weight: bold;
+  color: #fff;
+}
+
+/* ============= parts-list ============= */
+/* Тут можете добавить свои стили для списка комплектующих */
