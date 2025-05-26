@@ -5,7 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Конфігуратор ПК</title>
-    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/styles.css" />
 </head>
 
 <body>
@@ -21,7 +21,8 @@
                 </ul>
             </nav>
         </aside>
-        <!-- Main -->
+
+        <!-- Main content -->
         <div class="main">
             <header class="header">
                 <h1>New Build</h1>
@@ -30,6 +31,7 @@
                     <button id="saveBtn">Save Build</button>
                 </div>
             </header>
+
             <section class="parts-list">
                 <div class="part-category" data-cat="PCCase">
                     <h3>PC Case</h3>
@@ -64,7 +66,7 @@
                     <button class="add-btn">+ Add Storage</button>
                 </div>
                 <div class="part-category" data-cat="PSU">
-                    <h3>Power Supply (PSU)</h3>
+                    <h3>Power Supply</h3>
                     <button class="add-btn">+ Add PSU</button>
                 </div>
                 <div class="part-category" data-cat="Accessory">
@@ -130,6 +132,7 @@
     <!-- Quick Add Modal -->
     <div class="overlay" id="quickAddOverlay">
         <div class="modal">
+            <!-- 1) Фильтры -->
             <aside class="filter-sidebar">
                 <h4>Filters</h4>
                 <label><input type="checkbox" id="compatibilityOnly"> Compatibility Only</label><br>
@@ -140,7 +143,25 @@
                     <input type="range" id="priceRange" min="0" max="20000" step="100">
                 </div>
             </aside>
-            <section class="products-grid" id="productsGrid"></section>
+
+            <!-- 2) Контейнер для сетки и пагинации -->
+            <div class="quickadd-content">
+                <section class="products-grid" id="productsGrid"></section>
+
+                <div class="quickadd-footer">
+                    <div class="rows-per-page">
+                        Rows per page
+                        <select id="rowsPerPage">
+                            <option value="10">10</option>
+                            <option value="20" selected>20</option>
+                            <option value="50">50</option>
+                        </select>
+                    </div>
+                    <div id="paginationControls" class="pagination-controls"></div>
+                </div>
+            </div>
+
+            <!-- 3) Кнопка закрытия -->
             <button class="modal-close" id="closeQuickAdd">✕</button>
         </div>
     </div>
