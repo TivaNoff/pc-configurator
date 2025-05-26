@@ -1,0 +1,10 @@
+# Node.js
+backend/node_modules/
+backend/.env
+
+# База OpenDB
+open-db/
+
+# IDE и ОС
+.vscode/
+.DS_Store
