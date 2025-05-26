@@ -5,50 +5,110 @@ const Component = require("../models/Component");
 exports.createConfig = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { name, components } = req.body;
-    if (!Array.isArray(components) || components.length === 0) {
+    // если components не передан — считаем как пустой массив
+    const { name, components = [] } = req.body;
+
+    // только проверяем, что это массив (пустой — ОК)
+    if (!Array.isArray(components)) {
       return res.status(400).json({ message: "Components array required" });
     }
-    // Считаем totalPrice
-    const comps = await Component.find({ opendb_id: { $in: components } });
+
+    // считаем totalPrice (если components пуст — вернёт 0)
+    const comps = components.length
+      ? await Component.find({ opendb_id: { $in: components } })
+      : [];
     const totalPrice = comps.reduce((sum, c) => {
-      const vals = Object.values(c.prices).filter((v) => typeof v === "number");
+      const vals = Object.values(c.prices || {}).filter(
+        (v) => typeof v === "number"
+      );
       return sum + (vals.length ? Math.min(...vals) : 0);
     }, 0);
-    const cfg = await Config.create({
+
+    const newConfig = new Config({
       user: userId,
-      name,
+      name: name || "Моя збірка",
       components,
       totalPrice,
     });
-    res.status(201).json(cfg);
+
+    const saved = await newConfig.save();
+    return res.status(201).json(saved);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Server Error" });
+    return res.status(500).json({ message: "Server Error" });
   }
 };
 
 // GET /api/configs
 exports.getConfigs = async (req, res) => {
   try {
-    const userId = req.user.id;
-    const configs = await Config.find({ user: userId }).sort({ createdAt: -1 });
-    res.json(configs);
+    const configs = await Config.find({ user: req.user.id }).sort({
+      createdAt: -1,
+    });
+    return res.json(configs);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Server Error" });
+    return res.status(500).json({ message: "Server Error" });
   }
 };
 
 // GET /api/configs/:id
 exports.getConfigById = async (req, res) => {
   try {
-    const cfg = await Config.findOne({ _id: req.params.id, user: req.user.id });
+    const cfg = await Config.findOne({
+      _id: req.params.id,
+      user: req.user.id,
+    });
     if (!cfg) return res.status(404).json({ message: "Not found" });
-    res.json(cfg);
+    return res.json(cfg);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Server Error" });
+    return res.status(500).json({ message: "Server Error" });
+  }
+};
+
+// PUT /api/configs/:id
+exports.updateConfig = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const cfgId = req.params.id;
+    const { name, components } = req.body;
+
+    // если пришёл components, то он должен быть массивом
+    if (components !== undefined && !Array.isArray(components)) {
+      return res.status(400).json({ message: "Components must be array" });
+    }
+
+    // пересчитаем totalPrice только если передали components
+    let totalPrice;
+    if (Array.isArray(components)) {
+      const comps = components.length
+        ? await Component.find({ opendb_id: { $in: components } })
+        : [];
+      totalPrice = comps.reduce((sum, c) => {
+        const vals = Object.values(c.prices || {}).filter(
+          (v) => typeof v === "number"
+        );
+        return sum + (vals.length ? Math.min(...vals) : 0);
+      }, 0);
+    }
+
+    // Готовим объект для обновления
+    const update = {};
+    if (name !== undefined) update.name = name;
+    if (components !== undefined) update.components = components;
+    if (totalPrice !== undefined) update.totalPrice = totalPrice;
+
+    const updated = await Config.findOneAndUpdate(
+      { _id: cfgId, user: userId },
+      { $set: update },
+      { new: true }
+    );
+    if (!updated) return res.status(404).json({ message: "Not found" });
+    return res.json(updated);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Server Error" });
   }
 };
 
@@ -61,9 +121,9 @@ exports.deleteConfig = async (req, res) => {
     });
     if (!result.deletedCount)
       return res.status(404).json({ message: "Not found" });
-    res.json({ message: "Deleted" });
+    return res.json({ message: "Deleted" });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Server Error" });
+    return res.status(500).json({ message: "Server Error" });
   }
 };

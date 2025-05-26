@@ -188,6 +188,8 @@ grid.addEventListener("click", (e) => {
         detail: { category: currentCategory, product },
       })
     );
+    // нотификация для авто-сохранения
+    window.dispatchEvent(new Event("buildUpdated"));
     overlay.classList.remove("active");
   }
 });

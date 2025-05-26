@@ -1,16 +1,26 @@
 // public/js/build.js
 
-// Контейнер модалки, кнопка сохранения и отображение суммы
+// --- API конфигов ---
+const API = {
+  list: "/api/configs",
+  create: "/api/configs",
+  load: (id) => `/api/configs/${id}`,
+  update: (id) => `/api/configs/${id}`,
+};
+
+// --- Состояние ---
+let currentBuildId = null;
+let isSaving = false;
+const selectedParts = {}; // { category: product }
+
+// --- DOM ---
 const overlay = document.getElementById("quickAddOverlay");
-const saveBtn = document.getElementById("saveBtn");
+const buildName = document.getElementById("build-name");
+const buildSelector = document.getElementById("build-selector");
+const newBuildBtn = document.getElementById("new-build");
 const totalPriceSpan = document.getElementById("totalPrice");
 
-// Хранилище выбранных частей: { [category]: product }
-const selectedParts = {};
-
-/**
- * Собираем человеко-читаемое название из specs
- */
+// --- Утилиты из старого build.js ---
 function getBuildTitle(specs) {
   return (
     [specs.manufacturer, specs.series, specs.model, specs.metadata?.name]
@@ -20,70 +30,41 @@ function getBuildTitle(specs) {
     "Unnamed"
   );
 }
-
-/**
- * Получаем URL картинки: сперва OpenDB images, потом Amazon, иначе placeholder
- */
 function getBuildImage(specs) {
   if (specs?.general_product_information?.amazon_sku) {
-    return `https://images-na.ssl-images-amazon.com/images/P/${specs?.general_product_information?.amazon_sku}._SL500_.jpg`;
+    return `https://images-na.ssl-images-amazon.com/images/P/${specs.general_product_information.amazon_sku}._SL500_.jpg`;
   }
   return "/img/placeholder.png";
 }
-
-/**
- * Ссылка “Buy” только для Amazon
- */
 function getBuyLink(specs) {
   return specs?.general_product_information?.amazon_sku
-    ? `https://www.amazon.com/dp/${specs?.general_product_information?.amazon_sku}`
+    ? `https://www.amazon.com/dp/${specs.general_product_information.amazon_sku}`
     : null;
 }
-
-/**
- * Иконка магазина — только Amazon
- */
 function getStoreIcon(specs) {
   return specs?.general_product_information?.amazon_sku
     ? '<img src="/img/placeholder.png" class="store-icon" alt="Amazon"/>'
     : "";
 }
-
-/**
- * Пересчитываем общую стоимость и рисуем в шапке
- */
 function updateTotal() {
   let sum = 0;
   for (const p of Object.values(selectedParts)) {
     const prices = Object.values(p.prices || {}).filter(
       (v) => typeof v === "number"
     );
-    if (prices.length) {
-      sum += Math.min(...prices);
-    }
+    if (prices.length) sum += Math.min(...prices);
   }
   totalPriceSpan.textContent = `₴ ${sum}`;
 }
-
-/**
- * Рендерим одну выбранную часть внутри её .part-category
- */
 function renderPart(category, product) {
   selectedParts[category] = product;
-
-  // Ищем контейнер категории
   const container = document.querySelector(
     `.part-category[data-cat="${category}"]`
   );
-
-  // Удаляем старую разметку, если была
   container.querySelectorAll(".selected-part").forEach((el) => el.remove());
-
-  // Преобразуем кнопку
   const addBtn = container.querySelector(".add-btn");
   addBtn.textContent = "Swap Part";
 
-  // Собираем данные
   const { specs, prices } = product;
   const title = getBuildTitle(specs);
   const imgUrl = getBuildImage(specs);
@@ -91,7 +72,6 @@ function renderPart(category, product) {
   const link = getBuyLink(specs);
   const icon = getStoreIcon(specs);
 
-  // Создаём элемент
   const partDiv = document.createElement("div");
   partDiv.className = "selected-part";
   partDiv.innerHTML = `
@@ -106,28 +86,26 @@ function renderPart(category, product) {
       <button class="sp-remove" title="Remove">&times;</button>
     </div>
   `;
-
   container.append(partDiv);
   updateTotal();
 }
 
-// Обработчик кликов для удаления и swap
+// --- Удаление и замена части ---
 document.body.addEventListener("click", (e) => {
   // Удалить часть
   if (e.target.matches(".sp-remove")) {
-    const category = e.target.closest(".part-category").dataset.cat;
-    delete selectedParts[category];
+    const cat = e.target.closest(".part-category").dataset.cat;
+    delete selectedParts[cat];
     e.target.closest(".selected-part").remove();
-    // Возвращаем кнопку в исходное состояние
     const container = document.querySelector(
-      `.part-category[data-cat="${category}"]`
+      `.part-category[data-cat="${cat}"]`
     );
     const addBtn = container.querySelector(".add-btn");
     addBtn.textContent = `+ Add ${container.querySelector("h3").textContent}`;
     updateTotal();
+    window.dispatchEvent(new Event("buildUpdated"));
   }
-
-  // Повторно открыть Quick Add при Swap
+  // Swap снова открывает QuickAdd
   if (
     e.target.matches(".add-btn") &&
     selectedParts[e.target.closest(".part-category").dataset.cat]
@@ -136,86 +114,151 @@ document.body.addEventListener("click", (e) => {
   }
 });
 
-// Слушаем событие из quickAdd.js
-// detail: { category: string, product: object }
+// --- Подписка на добавление из quickAdd.js ---
 window.addEventListener("add-component", ({ detail }) => {
   renderPart(detail.category, detail.product);
+  // уведомляем систему автосохранения
+  window.dispatchEvent(new Event("buildUpdated"));
 });
 
-/**
- * Сохраняем сборку на сервер
- */
-saveBtn.addEventListener("click", async () => {
-  const parts = Object.values(selectedParts);
-  if (parts.length === 0) {
-    return alert("Додайте хоча б один компонент перед збереженням.");
-  }
-  const name = prompt("Назва збірки", "Моя збірка");
-  if (!name) return;
+// --- Собираем ID компонентов для отправки ---
+function getCurrentPartsData() {
+  return Object.values(selectedParts).map((p) => p.opendb_id);
+}
 
-  const components = parts.map((p) => p.opendb_id);
+// --- Управление списком сборок ---
+async function loadBuildList() {
+  const token = localStorage.getItem("token");
+  const res = await fetch(API.list, {
+    headers: { Authorization: "Bearer " + token },
+  });
+  const list = await res.json();
+  buildSelector.innerHTML = list
+    .map((b) => `<option value="${b._id}">${b.name}</option>`)
+    .join("");
+}
+
+// --- ЗАГРУЗКА СБОРКИ ---
+async function loadBuild(id) {
+  if (!id) return;
+  const token = localStorage.getItem("token");
+
+  // 1) Получаем данные сборки
+  const res = await fetch(API.load(id), {
+    headers: { Authorization: "Bearer " + token },
+  });
+  const cfg = await res.json();
+  currentBuildId = cfg._id;
+  buildName.textContent = cfg.name;
+
+  // 2) Очищаем текущее состояние
+  //    — очищаем selectedParts
+  Object.keys(selectedParts).forEach((c) => delete selectedParts[c]);
+  //    — удаляем все DOM-блоки с уже выбранными деталями
+  document.querySelectorAll(".selected-part").forEach((el) => el.remove());
+
+  // 3) Сбрасываем текст кнопок для всех категорий в "+ Add <Категория>"
+  document.querySelectorAll(".part-category").forEach((cat) => {
+    const title = cat.querySelector("h3").textContent.trim();
+    const btn = cat.querySelector(".add-btn");
+    btn.textContent = `+ Add ${title}`;
+  });
+
+  // 4) Загружаем детали из бэкенда и рендерим только их
+  const products = await Promise.all(
+    cfg.components.map((cid) =>
+      fetch(`/api/components/${cid}`, {
+        headers: { Authorization: "Bearer " + token },
+      }).then((r) => r.json())
+    )
+  );
+
+  products.forEach((p) => renderPart(p.category, p));
+
+  // 5) Обновляем итоговую цену (на всякий случай)
+  updateTotal();
+}
+
+// --- Новая сборка ---
+newBuildBtn.addEventListener("click", async () => {
+  const token = localStorage.getItem("token");
+  const res = await fetch(API.create, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + token,
+    },
+    body: JSON.stringify({ name: "Нова збірка", components: [] }),
+  });
+  const b = await res.json();
+  currentBuildId = b._id;
+
+  await loadBuildList();
+  buildSelector.value = b._id;
+  buildName.textContent = b.name;
+
+  // Очищаем UI: удаляем все выбранные компоненты
+  Object.keys(selectedParts).forEach((c) => delete selectedParts[c]);
+  document.querySelectorAll(".selected-part").forEach((el) => el.remove());
+  updateTotal();
+
+  // **Сбрасываем текст всех кнопок Add/Swap обратно на + Add <Категория>**
+  document.querySelectorAll(".part-category").forEach((cat) => {
+    const title = cat.querySelector("h3").textContent.trim();
+    const addBtn = cat.querySelector(".add-btn");
+    addBtn.textContent = `+ Add ${title}`;
+  });
+});
+
+// --- Переключение сборок ---
+buildSelector.addEventListener("change", () => {
+  loadBuild(buildSelector.value);
+});
+
+// --- Переименование сборки ---
+buildName.addEventListener("blur", async () => {
+  const newName = buildName.textContent.trim() || "Без назви";
+  buildName.textContent = newName;
+  if (!currentBuildId) return;
+  const token = localStorage.getItem("token");
+  await fetch(API.update(currentBuildId), {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + token,
+    },
+    body: JSON.stringify({ name: newName }),
+  });
+});
+
+// --- Авто-сохранение ---
+window.addEventListener("buildUpdated", async () => {
+  if (!currentBuildId || isSaving) return;
+  isSaving = true;
+  const token = localStorage.getItem("token");
   try {
-    const token = localStorage.getItem("token");
-    const res = await fetch("/api/configs", {
-      method: "POST",
+    await fetch(API.update(currentBuildId), {
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
         Authorization: "Bearer " + token,
       },
-      body: JSON.stringify({ name, components }),
+      body: JSON.stringify({ components: getCurrentPartsData() }),
     });
-    if (res.ok) {
-      alert("Сборка збережена!");
-      window.location.href = "/saved.html";
-    } else {
-      const err = await res.json();
-      alert("Помилка збереження: " + (err.message || res.statusText));
-    }
-  } catch (err) {
-    console.error(err);
-    alert("Сетева помилка при збереженні.");
+  } catch (e) {
+    console.error("Auto-save error:", e);
+  } finally {
+    isSaving = false;
   }
 });
 
-/**
- * Пришел параметр ?config=<ID> — загружаем эту сборку
- */
-(function loadFromQuery() {
-  const params = new URLSearchParams(window.location.search);
-  const cfgId = params.get("config");
-  if (!cfgId) return;
-
-  saveBtn.textContent = "Update Build";
-
-  (async () => {
-    const token = localStorage.getItem("token");
-    try {
-      // Получаем конфиг
-      const cfgRes = await fetch(`/api/configs/${cfgId}`, {
-        headers: { Authorization: "Bearer " + token },
-      });
-      if (!cfgRes.ok) throw new Error("Не вдалося завантажити конфігурацію");
-      const cfg = await cfgRes.json();
-
-      // Для каждого opendb_id запрашиваем полный объект
-      const proms = cfg.components.map((id) =>
-        fetch(`/api/components/${id}`, {
-          headers: { Authorization: "Bearer " + token },
-        }).then((r) => r.json())
-      );
-      const products = await Promise.all(proms);
-
-      // Добавляем их в сборку
-      products.forEach((p) => {
-        window.dispatchEvent(
-          new CustomEvent("add-component", {
-            detail: { category: p.category, product: p },
-          })
-        );
-      });
-    } catch (err) {
-      console.error(err);
-      alert(err.message);
-    }
-  })();
+// --- Инициализация при загрузке страницы ---
+(async function init() {
+  await loadBuildList();
+  if (buildSelector.options.length) {
+    buildSelector.value = buildSelector.options[0].value;
+    await loadBuild(buildSelector.value);
+  } else {
+    newBuildBtn.click();
+  }
 })();
