@@ -1,6 +1,4 @@
-// backend/src/models/User.js
-
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema({
   email: {
@@ -8,16 +6,10 @@ const userSchema = new mongoose.Schema({
     required: true,
     unique: true,
     lowercase: true,
-    trim: true
+    trim: true,
   },
-  passwordHash: {
-    type: String,
-    required: true
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
-  }
+  passwordHash: { type: String, required: true },
+  createdAt: { type: Date, default: Date.now },
 });
 
-module.exports = mongoose.model('User', userSchema);
+module.exports = mongoose.model("User", userSchema);

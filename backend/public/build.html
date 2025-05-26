@@ -3,13 +3,14 @@
 
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Конфігуратор ПК</title>
-    <link rel="stylesheet" href="/css/styles.css" />
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 
 <body>
     <div class="app">
+        <!-- Sidebar -->
         <aside class="sidebar">
             <h2>MyPC</h2>
             <nav>
@@ -20,25 +21,31 @@
                 </ul>
             </nav>
         </aside>
-
+        <!-- Main -->
         <div class="main">
             <header class="header">
                 <h1>New Build</h1>
                 <div class="controls">
                     <span id="totalPrice">₴ 0</span>
-                    <select id="configSelect">
-                        <option value="">– New build –</option>
-                    </select>
-                    <span id="saveStatus">Saved</span>
                     <button id="saveBtn">Save Build</button>
                 </div>
             </header>
-
             <section class="parts-list">
-                <!-- Пример: все ваши категории -->
+                <div class="part-category" data-cat="PCCase">
+                    <h3>PC Case</h3>
+                    <button class="add-btn">+ Add PC Case</button>
+                </div>
+                <div class="part-category" data-cat="CaseFan">
+                    <h3>Case Fan</h3>
+                    <button class="add-btn">+ Add Case Fan</button>
+                </div>
                 <div class="part-category" data-cat="CPU">
                     <h3>CPU</h3>
                     <button class="add-btn">+ Add CPU</button>
+                </div>
+                <div class="part-category" data-cat="CPUCooler">
+                    <h3>CPU Cooler</h3>
+                    <button class="add-btn">+ Add CPU Cooler</button>
                 </div>
                 <div class="part-category" data-cat="Motherboard">
                     <h3>Motherboard</h3>
@@ -48,7 +55,74 @@
                     <h3>GPU</h3>
                     <button class="add-btn">+ Add GPU</button>
                 </div>
-                <!-- …и так далее для всех категорий… -->
+                <div class="part-category" data-cat="RAM">
+                    <h3>RAM</h3>
+                    <button class="add-btn">+ Add RAM</button>
+                </div>
+                <div class="part-category" data-cat="Storage">
+                    <h3>Storage</h3>
+                    <button class="add-btn">+ Add Storage</button>
+                </div>
+                <div class="part-category" data-cat="PSU">
+                    <h3>Power Supply (PSU)</h3>
+                    <button class="add-btn">+ Add PSU</button>
+                </div>
+                <div class="part-category" data-cat="Accessory">
+                    <h3>Accessory</h3>
+                    <button class="add-btn">+ Add Accessory</button>
+                </div>
+                <div class="part-category" data-cat="CaptureCard">
+                    <h3>Capture Card</h3>
+                    <button class="add-btn">+ Add Capture Card</button>
+                </div>
+                <div class="part-category" data-cat="NetworkCard">
+                    <h3>Network Card</h3>
+                    <button class="add-btn">+ Add Network Card</button>
+                </div>
+                <div class="part-category" data-cat="SoundCard">
+                    <h3>Sound Card</h3>
+                    <button class="add-btn">+ Add Sound Card</button>
+                </div>
+                <div class="part-category" data-cat="Headphones">
+                    <h3>Headphones</h3>
+                    <button class="add-btn">+ Add Headphones</button>
+                </div>
+                <div class="part-category" data-cat="Microphone">
+                    <h3>Microphone</h3>
+                    <button class="add-btn">+ Add Microphone</button>
+                </div>
+                <div class="part-category" data-cat="Speaker">
+                    <h3>Speaker</h3>
+                    <button class="add-btn">+ Add Speaker</button>
+                </div>
+                <div class="part-category" data-cat="Mouse">
+                    <h3>Mouse</h3>
+                    <button class="add-btn">+ Add Mouse</button>
+                </div>
+                <div class="part-category" data-cat="Keyboard">
+                    <h3>Keyboard</h3>
+                    <button class="add-btn">+ Add Keyboard</button>
+                </div>
+                <div class="part-category" data-cat="Monitor">
+                    <h3>Monitor</h3>
+                    <button class="add-btn">+ Add Monitor</button>
+                </div>
+                <div class="part-category" data-cat="OS">
+                    <h3>Operating System</h3>
+                    <button class="add-btn">+ Add OS</button>
+                </div>
+                <div class="part-category" data-cat="ThermalCompound">
+                    <h3>Thermal Compound</h3>
+                    <button class="add-btn">+ Add Thermal Compound</button>
+                </div>
+                <div class="part-category" data-cat="VRHeadset">
+                    <h3>VR Headset</h3>
+                    <button class="add-btn">+ Add VR Headset</button>
+                </div>
+                <div class="part-category" data-cat="Webcam">
+                    <h3>Webcam</h3>
+                    <button class="add-btn">+ Add Webcam</button>
+                </div>
             </section>
         </div>
     </div>
@@ -58,14 +132,15 @@
         <div class="modal">
             <aside class="filter-sidebar">
                 <h4>Filters</h4>
-                <label><input type="checkbox" id="compatibilityOnly"> Compatibility Only</label><br />
+                <label><input type="checkbox" id="compatibilityOnly"> Compatibility Only</label><br>
                 <label><input type="checkbox" id="only3d"> 3D Only</label>
-                <hr />
-                <h5>Price</h5>
-                <input type="range" id="priceRange" min="0" max="100000" step="1000" value="0" />
+                <hr>
+                <div>
+                    <h5>Price</h5>
+                    <input type="range" id="priceRange" min="0" max="20000" step="100">
+                </div>
             </aside>
             <section class="products-grid" id="productsGrid"></section>
-            <div class="pagination-controls" id="paginationControls"></div>
             <button class="modal-close" id="closeQuickAdd">✕</button>
         </div>
     </div>

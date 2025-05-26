@@ -6,42 +6,55 @@
   --border: #333;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 body {
-  display: flex;
-  height: 100vh;
   font-family: sans-serif;
   background: var(--bg);
   color: var(--fg);
-
+  min-height: 100vh;
 }
 
-/* Sidebar */
+nav a {
+  color: var(--accent);
+  text-decoration: none;
+}
+.error {
+  color: red;
+  margin-top: 0.5rem;
+}
+
+.app {
+  display: flex;
+  height: 100vh;
+}
 .sidebar {
   width: 240px;
   background: var(--bg-alt);
   padding: 1rem;
-  display: flex;
-  flex-direction: column;
 }
-.sidebar h2 { margin-bottom: 1rem; }
-.sidebar nav ul { list-style: none; }
-.sidebar nav li { margin: .5rem 0; }
-.sidebar nav a {
-  color: var(--fg);
-  text-decoration: none;
+.sidebar h2 {
+  margin-bottom: 1rem;
 }
-.sidebar nav a:hover { color: var(--accent); }
+.sidebar nav ul {
+  list-style: none;
+}
+.sidebar nav li {
+  margin: 0.5rem 0;
+}
+.sidebar nav a:hover {
+  color: #fff;
+}
 
-/* Main */
 .main {
   flex: 1;
   display: flex;
   flex-direction: column;
-  overflow-y: auto; 
+  overflow-y: auto;
 }
-
-/* Header */
 .header {
   display: flex;
   justify-content: space-between;
@@ -49,126 +62,79 @@ body {
   padding: 1rem;
   border-bottom: 1px solid var(--border);
 }
-.header .controls span {
-  font-size: 1.2rem;
-  margin-right: 1rem;
-}
 .header .controls button {
   background: var(--accent);
   border: none;
   color: #fff;
-  padding: .5rem 1rem;
+  padding: 0.5rem 1rem;
   cursor: pointer;
 }
-.header .controls button:hover { opacity: .9; }
-
-/* Parts list */
 .parts-list {
-  padding: 1rem;
+  flex: 1;
   overflow-y: auto;
+  padding: 1rem;
 }
 .part-category {
+  position: relative;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 0.75rem;
   background: var(--bg-alt);
-  margin-bottom: .75rem;
-  padding: .75rem;
+  margin-bottom: 0.75rem;
+  padding: 0.75rem;
   border-radius: 4px;
 }
-.part-category h3 { font-size: 1rem; }
+.part-category h3 {
+  width: 120px;
+  margin: 0;
+}
 .part-category .add-btn {
+  margin-left: auto;
   background: var(--accent);
   border: none;
   color: #fff;
-  padding: .3rem .6rem;
+  padding: 0.3rem 0.6rem;
   cursor: pointer;
-  border-radius: 2px;
 }
-.part-category .add-btn:hover { opacity: .9; }
+.part-category .add-btn:hover {
+  opacity: 0.9;
+}
 
-/* Modal overlay */
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,.8);
+  background: rgba(0, 0, 0, 0.8);
   display: none;
   justify-content: center;
   align-items: center;
 }
-.overlay.active { display: flex; }
-
-/* Modal */
-.modal {
+.overlay.active {
   display: flex;
+}
+.modal {
   background: var(--bg);
   width: 90%;
   height: 90%;
+  display: flex;
+  position: relative;
   border-radius: 6px;
   overflow: hidden;
-  position: relative;
 }
-
-/* Filter sidebar */
 .filter-sidebar {
   width: 240px;
   background: var(--bg-alt);
   padding: 1rem;
   overflow-y: auto;
 }
-
-/* Products grid */
 .products-grid {
-  flex: 1;                /* <— Обязательно */
+  flex: 1;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 1rem;
   padding: 1rem;
   overflow-y: auto;
-  background: var(--bg-alt);
+  background: var(--bg);
 }
-
-/* Product card */
-.products-grid .card {
-  background: var(--bg-alt);
-  padding: .5rem;
-  border-radius: 4px;
-  text-align: center;
-}
-.products-grid .card img {
-  width: 100%;
-  height: 100px;
-  object-fit: contain;
-  margin-bottom: .5rem;
-}
-.products-grid .card h4 {
-  font-size: .9rem;
-  margin-bottom: .3rem;
-}
-.products-grid .card button {
-  margin-top: .5rem;
-  background: var(--accent);
-  color: #fff;
-  border: none;
-  padding: .3rem .5rem;
-  cursor: pointer;
-  border-radius: 2px;
-}
-.products-grid .card button:hover { opacity: .9; }
-
-/* Close button */
-.modal-close {
-  position: absolute;
-  top: .5rem;
-  right: 1rem;
-  background: transparent;
-  border: none;
-  color: var(--fg);
-  font-size: 1.2rem;
-  cursor: pointer;
-}
-
-/* карточки */
 .card {
   background: var(--bg-alt);
   border: 1px solid var(--border);
@@ -189,8 +155,8 @@ body {
 .card-title {
   font-size: 0.9rem;
   line-height: 1.2;
-  height: 2.4em;   /* ограничиваем две строки */
-  overflow: hidden;
+  white-space: normal;
+  margin: 0.25em 0;
 }
 .card-price {
   color: var(--accent);
@@ -200,11 +166,10 @@ body {
   list-style: none;
   font-size: 0.8rem;
   color: #ccc;
-  margin-top: 0.5rem;
   flex: 1;
 }
 .card-specs li {
-  margin-bottom: 0.25rem;
+  margin: 0.25em 0;
 }
 .add-to-build {
   background: var(--accent);
@@ -239,33 +204,13 @@ body {
   cursor: default;
 }
 
-.part-category {
-  position: relative;
-  padding: 0.75rem;
-  background: var(--bg-alt);
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.part-category h3 {
-  margin: 0;
-  flex-shrink: 0;
-  width: 120px; /* либо авто по содержимому */
-}
-
-.part-category .add-btn {
-  margin-left: auto;
-}
-
+/* Build.js selected part */
 .selected-part {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  margin-left: auto; /* чтобы справа от заголовка */
+  margin-left: auto;
 }
-
 .sp-thumb {
   width: 48px;
   height: 48px;
@@ -273,16 +218,13 @@ body {
   border: 1px solid var(--border);
   border-radius: 4px;
 }
-
 .sp-info {
   flex: 1;
 }
-
 .sp-title {
   font-size: 0.95rem;
   font-weight: 500;
 }
-
 .sp-price {
   color: var(--accent);
   font-size: 0.9rem;
@@ -290,18 +232,15 @@ body {
   align-items: center;
   gap: 0.25rem;
 }
-
 .store-icon {
   width: 16px;
   height: 16px;
 }
-
 .sp-actions {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
-
 .sp-buy {
   background: var(--accent);
   color: #fff;
@@ -309,7 +248,6 @@ body {
   text-decoration: none;
   border-radius: 3px;
 }
-
 .sp-remove {
   background: transparent;
   border: none;
@@ -318,4 +256,3 @@ body {
   font-size: 1.2rem;
   line-height: 1;
 }
-
