@@ -24,3 +24,12 @@ export async function fetchProductsByCategory(category) {
   return json.data || [];
 }
 
+export async function fetchProductsByConfig(configId) {
+  const token = localStorage.getItem('token');
+  const res    = await fetch(`/api/configs/${configId}`, {
+    headers: { 'Authorization': 'Bearer ' + token }
+  });
+  const cfg = await res.json();
+  // возвращаем массив ID для build.js
+  return cfg.components;
+}

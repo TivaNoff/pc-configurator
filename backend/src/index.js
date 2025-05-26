@@ -29,6 +29,8 @@ app.use('/api/auth', require('./routes/auth'));
 // Protected config routes
 app.use('/api/configs', require('./routes/configs'));
 
+
+
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
   console.log(`🚀 Server listening on port ${PORT}`);

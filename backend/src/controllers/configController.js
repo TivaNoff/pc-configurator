@@ -67,3 +67,33 @@ exports.deleteConfig = async (req, res) => {
     res.status(500).json({ message: 'Server Error' });
   }
 };
+
+// PUT /api/configs/:id
+exports.updateConfig = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { id } = req.params;
+    const { name, components: compIds } = req.body;
+    if (!Array.isArray(compIds)) {
+      return res.status(400).json({ message: 'Components must be array' });
+    }
+
+    // Пересчёт цены
+    const comps = await Component.find({ opendb_id: { $in: compIds } });
+    const totalPrice = comps.reduce((sum, c) => {
+      const vals = Object.values(c.prices).filter(v => typeof v === 'number');
+      return sum + (vals.length ? Math.min(...vals) : 0);
+    }, 0);
+
+    const updated = await Config.findOneAndUpdate(
+      { _id: id, user: userId },
+      { name, components: compIds, totalPrice },
+      { new: true }
+    );
+    if (!updated) return res.status(404).json({ message: 'Not found' });
+    res.json(updated);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};

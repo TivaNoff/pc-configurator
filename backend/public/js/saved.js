@@ -2,32 +2,51 @@
 const token = localStorage.getItem('token');
 if (!token) location.href = '/login.html';
 
-(async () => {
-  const container = document.getElementById('savedList');
-  try {
-    const res = await fetch('/api/configs', {
-      headers: { 'Authorization':'Bearer '+token }
-    });
-    const configs = await res.json();
-    container.innerHTML = '<ul>' + configs.map(c => `
-      <li data-id="${c._id}">
-        ${c.name} — ${c.totalPrice} грн
-        <button class="delBtn">Видалити</button>
-      </li>
-    `).join('') + '</ul>';
-    // навесим удаление
-    container.querySelectorAll('.delBtn').forEach(btn => {
-      btn.addEventListener('click', async e => {
-        const li = e.target.closest('li');
-        const id = li.dataset.id;
-        const del = await fetch('/api/configs/'+id, {
-          method:'DELETE',
-          headers: { 'Authorization':'Bearer '+token }
-        });
-        if (del.ok) li.remove();
+const container = document.getElementById('savedList');
+
+async function loadConfigs() {
+  const res = await fetch('/api/configs', {
+    headers: { 'Authorization': 'Bearer ' + token }
+  });
+  return res.ok ? res.json() : [];
+}
+
+function renderConfigs(configs) {
+  container.innerHTML = configs.map(c => `
+    <div class="saved-item" data-id="${c._id}">
+      <span class="si-name">${c.name}</span> —
+      <span class="si-price">${c.totalPrice} ₴</span>
+      <button class="si-load">Load</button>
+      <button class="si-delete">Delete</button>
+    </div>
+  `).join('');
+
+  // Навешиваем обработчики
+  container.querySelectorAll('.si-delete').forEach(btn => {
+    btn.addEventListener('click', async e => {
+      const id = e.target.closest('.saved-item').dataset.id;
+      const d = await fetch(`/api/configs/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': 'Bearer ' + token }
       });
+      if (d.ok) loadAndRender();
+      else alert('Не вдалося видалити');
     });
-  } catch {
-    container.textContent = 'Помилка завантаження';
-  }
-})();
+  });
+
+  container.querySelectorAll('.si-load').forEach(btn => {
+    btn.addEventListener('click', e => {
+      const id = e.target.closest('.saved-item').dataset.id;
+      // перенаправляем на build.html с параметром config
+      location.href = `/build.html?config=${id}`;
+    });
+  });
+}
+
+async function loadAndRender() {
+  container.textContent = 'Завантаження…';
+  const configs = await loadConfigs();
+  renderConfigs(configs);
+}
+
+loadAndRender();

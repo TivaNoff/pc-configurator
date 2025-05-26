@@ -12,6 +12,9 @@ const {
 
 // Все роуты защищены
 router.use(authMiddleware);
+// после router.use(authMiddleware)
+router.put('/:id', updateConfig);
+
 
 router.post('/', createConfig);
 router.get('/', getConfigs);

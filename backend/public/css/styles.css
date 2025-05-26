@@ -217,3 +217,105 @@ body {
 .add-to-build:hover {
   opacity: 0.9;
 }
+
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem 0;
+  background: var(--bg-alt);
+}
+.pagination-controls button {
+  background: var(--accent);
+  border: none;
+  color: #fff;
+  padding: 0.3rem 0.6rem;
+  cursor: pointer;
+  border-radius: 3px;
+}
+.pagination-controls button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.part-category {
+  position: relative;
+  padding: 0.75rem;
+  background: var(--bg-alt);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.part-category h3 {
+  margin: 0;
+  flex-shrink: 0;
+  width: 120px; /* либо авто по содержимому */
+}
+
+.part-category .add-btn {
+  margin-left: auto;
+}
+
+.selected-part {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-left: auto; /* чтобы справа от заголовка */
+}
+
+.sp-thumb {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+.sp-info {
+  flex: 1;
+}
+
+.sp-title {
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.sp-price {
+  color: var(--accent);
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.store-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.sp-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sp-buy {
+  background: var(--accent);
+  color: #fff;
+  padding: 0.3rem 0.6rem;
+  text-decoration: none;
+  border-radius: 3px;
+}
+
+.sp-remove {
+  background: transparent;
+  border: none;
+  color: var(--fg);
+  cursor: pointer;
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
