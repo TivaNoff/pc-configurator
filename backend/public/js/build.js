@@ -30,21 +30,17 @@ function getBuildTitle(specs) {
     "Unnamed"
   );
 }
-function getBuildImage(specs) {
-  if (specs?.general_product_information?.amazon_sku) {
-    return `https://images-na.ssl-images-amazon.com/images/P/${specs.general_product_information.amazon_sku}._SL500_.jpg`;
+function getBuildImage(product) {
+  if (product?.storeImg?.Ekua) {
+    return product.storeImg.Ekua;
   }
   return "/img/placeholder.png";
 }
-function getBuyLink(specs) {
-  return specs?.general_product_information?.amazon_sku
-    ? `https://www.amazon.com/dp/${specs.general_product_information.amazon_sku}`
-    : null;
+function getBuyLink(product) {
+  return product?.storeIds?.Ekua;
 }
-function getStoreIcon(specs) {
-  return specs?.general_product_information?.amazon_sku
-    ? '<img src="/img/placeholder.png" class="store-icon" alt="Amazon"/>'
-    : "";
+function getStoreIcon(product) {
+  '<img src="/img/logo.svg" class="store-icon" alt="Ek"/>';
 }
 function updateTotal() {
   let sum = 0;
@@ -67,9 +63,9 @@ function renderPart(category, product) {
 
   const { specs, prices } = product;
   const title = getBuildTitle(specs);
-  const imgUrl = getBuildImage(specs);
-  const price = "N/A";
-  const link = getBuyLink(specs);
+  const imgUrl = getBuildImage(product);
+  const price = product.prices?.Ekua ?? 0;
+  const link = getBuyLink(product);
   const icon = getStoreIcon(specs);
 
   const partDiv = document.createElement("div");
@@ -79,7 +75,7 @@ function renderPart(category, product) {
          onerror="this.src='/img/placeholder.png'" />
     <div class="sp-info">
       <div class="sp-title">${title}</div>
-      <div class="sp-price">${price}₴ ${icon}</div>
+      <div class="sp-price">${price}₴ <img src="/img/logo.svg" class="store-icon" alt="Ek"/>'</div>
     </div>
     <div class="sp-actions">
       ${link ? `<a href="${link}" target="_blank" class="sp-buy">Buy</a>` : ""}

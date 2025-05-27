@@ -4,7 +4,7 @@ const path = require("path");
 const mongoose = require("mongoose");
 const Component = require("../models/Component");
 
-const OPEN_DB_PATH = path.resolve(__dirname, "../../open-db");
+const OPEN_DB_PATH = path.resolve(__dirname, "../../../open-db");
 
 async function importComponents() {
   await mongoose.connect(process.env.MONGODB_URI);
@@ -25,6 +25,7 @@ async function importComponents() {
         specs: data,
         storeIds: {},
         prices: {},
+        storeImg: {},
       };
       await Component.updateOne(
         { opendb_id: doc.opendb_id },

@@ -5,16 +5,13 @@ const componentSchema = new mongoose.Schema({
   category: { type: String, required: true },
   specs: { type: mongoose.Schema.Types.Mixed, default: {} },
   storeIds: {
-    rozetka: String,
-    telemart: String,
-    compx: String,
-    itbox: String,
+    Ekatalog: String,
   },
   prices: {
-    rozetka: Number,
-    telemart: Number,
-    compx: Number,
-    itbox: Number,
+    Ekatalog: Number,
+  },
+  storeImg: {
+    Ekatalog: String,
   },
 });
 

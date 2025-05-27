@@ -60,7 +60,10 @@ function getKeySpecs(specs, category) {
 }
 
 /** 2) Выбор URL картинки */
-function getImageUrl(specs) {
+function getImageUrl(p, specs) {
+  if (p?.storeImg?.Ekua) {
+    return p.storeImg.Ekua;
+  }
   if (specs?.general_product_information?.amazon_sku) {
     return `https://images-na.ssl-images-amazon.com/images/P/${specs?.general_product_information?.amazon_sku}._SL500_.jpg`;
   }
@@ -79,13 +82,14 @@ function renderProductsPage() {
         p.specs?.metadata?.name ||
         [s.manufacturer, s.series, s.model].filter(Boolean).join(" ") ||
         p.opendb_id;
-      const price = p.prices?.rozetka ?? "N/A";
-      const imgUrl = getImageUrl(s);
+      const price = p.prices?.Ekua ?? "N/A";
+      const imgUrl = getImageUrl(p, s);
       const specsLi = getKeySpecs(s, currentCategory)
         .map((e) => `<li><strong>${e.k}:</strong> ${e.v}</li>`)
         .join("");
 
       return `
+      
       <div class="card" data-id="${p.opendb_id}">
         <div class="card-img">
           <img src="${imgUrl}" alt="${title}"
@@ -143,7 +147,7 @@ function renderPagination() {
 function applyFiltersAndRender() {
   const minP = Number(priceRange.value);
   filteredProducts = allProducts.filter((p) => {
-    const price = p.prices?.rozetka ?? 0;
+    const price = p.prices?.Ekua ?? 0;
     if (price < minP) return false;
     if (compOnly.checked && p.specs?.compatible === false) return false;
     if (only3d.checked && !p.specs?.has_3d_model) return false;
