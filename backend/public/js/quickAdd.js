@@ -5,11 +5,70 @@ import { fetchProductsByCategory } from "./components.js";
 const overlay = document.getElementById("quickAddOverlay");
 const grid = document.getElementById("productsGrid");
 const closeBtn = document.getElementById("closeQuickAdd");
-const priceRange = document.getElementById("priceRange");
+
+const priceMin = document.getElementById("priceMin");
+const priceMax = document.getElementById("priceMax");
+const priceMinVal = document.getElementById("priceMinVal");
+const priceMaxVal = document.getElementById("priceMaxVal");
+
+let defaultMinPrice = 0;
+let defaultMaxPrice = 0;
+
+/**
+ * Ініціалізує фільтри:
+ * - обчислює мінімальну й максимальну ціну в allProducts
+ * - підставляє їх у повзунки
+ * - очищує поле пошуку й чекбокси
+ */
+function initFilters() {
+  const prices = allProducts
+    .map((p) => p.prices?.Ekua)
+    .filter((v) => v != null);
+
+  // якщо цін не знайдено — виходимо
+  if (prices.length === 0) return;
+
+  defaultMinPrice = Math.min(...prices);
+  defaultMaxPrice = Math.max(...prices);
+
+  // встановлюємо межі й значення повзунків
+  priceMin.min = priceMax.min = defaultMinPrice;
+  priceMin.max = priceMax.max = defaultMaxPrice;
+
+  priceMin.value = defaultMinPrice;
+  priceMax.value = defaultMaxPrice;
+
+  // підпис під повзунками
+  priceMinVal.textContent = `$${defaultMinPrice}`;
+  priceMaxVal.textContent = `$${defaultMaxPrice}`;
+
+  // скидати інші фільтри
+  searchInput.value = "";
+  compOnly.checked = false;
+  only3d.checked = false;
+}
+
 const compOnly = document.getElementById("compatibilityOnly");
 const only3d = document.getElementById("only3d");
 const rowsPerPageSel = document.getElementById("rowsPerPage");
 const paginationCtrls = document.getElementById("paginationControls");
+
+// Поле поиска
+const searchInput = document.createElement("input");
+searchInput.id = "component-search";
+searchInput.type = "text";
+searchInput.placeholder = "Search by name...";
+searchInput.style.cssText = `
+  display: block;
+  width: 90%;
+  margin: 8px auto;
+  padding: 6px 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+`;
+const gridParent = grid.parentNode;
+gridParent.insertBefore(searchInput, grid);
+searchInput.addEventListener("input", applyFiltersAndRender);
 
 let currentCategory = null;
 let allProducts = [];
@@ -52,7 +111,6 @@ function getKeySpecs(specs, category) {
       ["Wattage", specs.wattage ? specs.wattage + " W" : null],
       ["Modular", specs.modular],
     ],
-    // добавьте остальные при необходимости
   };
   return (map[category] || [])
     .filter(([_, v]) => v != null)
@@ -65,7 +123,7 @@ function getImageUrl(p, specs) {
     return p.storeImg.Ekua;
   }
   if (specs?.general_product_information?.amazon_sku) {
-    return `https://images-na.ssl-images-amazon.com/images/P/${specs?.general_product_information?.amazon_sku}._SL500_.jpg`;
+    return `https://images-na.ssl-images-amazon.com/images/P/${specs.general_product_information.amazon_sku}._SL500_.jpg`;
   }
   return "/img/placeholder.png";
 }
@@ -89,16 +147,16 @@ function renderProductsPage() {
         .join("");
 
       return `
-      
       <div class="card" data-id="${p.opendb_id}">
         <div class="card-img">
-          <img src="${imgUrl}" alt="${title}"
-               onerror="this.src='/img/placeholder.png'" />
+          <img src="${imgUrl}" alt="${title}" onerror="this.src='/img/placeholder.png'" />
         </div>
-        <h4 class="card-title">${title}</h4>
-        <p class="card-price">${price} грн</p>
-        <ul class="card-specs">${specsLi}</ul>
-        <button class="add-to-build">Add to build</button>
+        <div class="card-info">
+          <h4 class="card-title">${title}</h4>
+          <p class="card-price">${price} грн</p>
+          <ul class="card-specs">${specsLi}</ul>
+          <button class="add-to-build">Add to build</button>
+        </div>
       </div>`;
     })
     .join("");
@@ -124,7 +182,6 @@ function renderPagination() {
       currentPage === totalPages ? "disabled" : ""
     }>&raquo;</button>
   `;
-
   paginationCtrls.querySelector("#firstPage").onclick = () => {
     currentPage = 1;
     renderProductsPage();
@@ -143,16 +200,41 @@ function renderPagination() {
   };
 }
 
-// 5) Фильтрация по цене/совместимости/3D
+// 5) Фильтрация по цене/совместимости/3D и поиску с приоритетом стоимости
 function applyFiltersAndRender() {
-  const minP = Number(priceRange.value);
-  filteredProducts = allProducts.filter((p) => {
-    const price = p.prices?.Ekua ?? 0;
-    if (price < minP) return false;
+  // замість одного priceRange.value
+  const minP = Number(priceMin.value);
+  const maxP = Number(priceMax.value);
+  const defaultMin = Number(priceMin.min);
+  const defaultMax = Number(priceMax.max);
+  const query = searchInput.value.trim().toLowerCase();
+  const filtersApplied =
+    minP > defaultMin ||
+    maxP < defaultMax ||
+    query !== "" ||
+    compOnly.checked ||
+    only3d.checked;
+
+  // фільтрація по діапазону
+  const temp = allProducts.filter((p) => {
+    const price = p.prices?.Ekua;
+    if (price < minP || price > maxP) return false;
     if (compOnly.checked && p.specs?.compatible === false) return false;
     if (only3d.checked && !p.specs?.has_3d_model) return false;
+    const name = (p.specs?.metadata?.name || "").toLowerCase();
+    if (query && !name.includes(query)) return false;
     return true;
   });
+
+  // Если нет примененных фильтров, сначала компоненты с ценой, потом без цены
+  if (!filtersApplied) {
+    const withPrice = temp.filter((p) => p.prices?.Ekua != 0);
+    const withoutPrice = temp.filter((p) => p.prices?.Ekua == 0);
+    filteredProducts = [...withPrice, ...withoutPrice];
+  } else {
+    filteredProducts = temp;
+  }
+
   currentPage = 1;
   renderProductsPage();
 }
@@ -165,14 +247,28 @@ document.body.addEventListener("click", async (e) => {
     allProducts = await fetchProductsByCategory(currentCategory);
     filteredProducts = [...allProducts];
     currentPage = 1;
-    renderProductsPage();
+
+    initFilters();
+
+    applyFiltersAndRender();
   }
 });
 
 // 7) Навешиваем слушатели на фильтры и селект “Rows per page”
-priceRange.addEventListener("input", applyFiltersAndRender);
 compOnly.addEventListener("input", applyFiltersAndRender);
 only3d.addEventListener("input", applyFiltersAndRender);
+searchInput.addEventListener("input", applyFiltersAndRender);
+priceMin.addEventListener("input", () => {
+  if (+priceMin.value > +priceMax.value) priceMin.value = priceMax.value;
+  priceMinVal.textContent = `$${priceMin.value}`;
+  applyFiltersAndRender();
+});
+priceMax.addEventListener("input", () => {
+  if (+priceMax.value < +priceMin.value) priceMax.value = priceMin.value;
+  priceMaxVal.textContent = `$${priceMax.value}`;
+  applyFiltersAndRender();
+});
+
 rowsPerPageSel.addEventListener("change", () => {
   pageSize = parseInt(rowsPerPageSel.value, 10);
   currentPage = 1;
@@ -180,10 +276,14 @@ rowsPerPageSel.addEventListener("change", () => {
 });
 
 // 8) Закрытие модалки
-closeBtn.addEventListener("click", () => overlay.classList.remove("active"));
+closeBtn.addEventListener("click", () => {
+  initFilters();
+  overlay.classList.remove("active");
+});
 
 // 9) Добавление товара в сборку
 grid.addEventListener("click", (e) => {
+  searchInput.value = "";
   if (e.target.matches(".add-to-build")) {
     const id = e.target.closest(".card").dataset.id;
     const product = filteredProducts.find((p) => p.opendb_id === id);
@@ -192,7 +292,6 @@ grid.addEventListener("click", (e) => {
         detail: { category: currentCategory, product },
       })
     );
-    // нотификация для авто-сохранения
     window.dispatchEvent(new Event("buildUpdated"));
     overlay.classList.remove("active");
   }

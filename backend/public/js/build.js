@@ -19,6 +19,11 @@ const buildName = document.getElementById("build-name");
 const buildSelector = document.getElementById("build-selector");
 const newBuildBtn = document.getElementById("new-build");
 const totalPriceSpan = document.getElementById("totalPrice");
+const compatibilitySpan = document.getElementById("compatibility");
+const totalTdpSpan = document.getElementById("totalTdp");
+const mark3dSpan = document.getElementById("mark3d");
+const buildDateSpan = document.getElementById("build-date");
+const buildAuthorSpan = document.getElementById("build-author");
 
 // --- Утилиты из старого build.js ---
 function getBuildTitle(specs) {
@@ -43,15 +48,42 @@ function getStoreIcon(product) {
   '<img src="/img/logo.svg" class="store-icon" alt="Ek"/>';
 }
 function updateTotal() {
-  let sum = 0;
+  // ——————————————— 1) Цена — не меняем ———————————————
+  let sumPrice = 0;
   for (const p of Object.values(selectedParts)) {
-    const prices = Object.values(p.prices || {}).filter(
+    const vals = Object.values(p.prices || {}).filter(
       (v) => typeof v === "number"
     );
-    if (prices.length) sum += Math.min(...prices);
+    if (vals.length) sumPrice += Math.min(...vals);
   }
-  totalPriceSpan.textContent = `₴ ${sum}`;
+  totalPriceSpan.textContent = sumPrice.toFixed(2).replace(".", ",");
+
+  // ——————————————— 2) TDP с fallback на specs.specifications.tdp ———————————————
+  let sumTdp = 0;
+  for (const p of Object.values(selectedParts)) {
+    if (p.specs) {
+      let tdpVal = 0;
+      // берём первую очередь из p.specs.tdp
+      if (typeof p.specs.tdp === "number") {
+        tdpVal = p.specs.tdp;
+      }
+      // иначе пытаемся найти в p.specs.specifications.tdp
+      else if (
+        p.specs.specifications &&
+        typeof p.specs.specifications.tdp === "number"
+      ) {
+        tdpVal = p.specs.specifications.tdp;
+      }
+      sumTdp += tdpVal;
+    }
+  }
+  totalTdpSpan.textContent = sumTdp;
+
+  // ——————————————— 3) Заглушки для остального ———————————————
+  compatibilitySpan.textContent = "Compatible";
+  mark3dSpan.textContent = "—";
 }
+
 function renderPart(category, product) {
   selectedParts[category] = product;
   const container = document.querySelector(
@@ -146,6 +178,17 @@ async function loadBuild(id) {
   const cfg = await res.json();
   currentBuildId = cfg._id;
   buildName.textContent = cfg.name;
+
+  // Дата создания (cfg.createdAt берётся из модели Config)
+  const dt = new Date(cfg.createdAt);
+  buildDateSpan.textContent = dt.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+
+  // Автор — пока как заглушка (у вас в cfg.user только ID)
+  buildAuthorSpan.textContent = "Anonymous";
 
   // 2) Очищаем текущее состояние
   //    — очищаем selectedParts

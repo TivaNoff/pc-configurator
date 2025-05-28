@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Конфігуратор ПК</title>
     <link rel="stylesheet" href="/css/styles.css" />
+    <script src="https://kit.fontawesome.com/0ac0840733.js" crossorigin="anonymous"></script>
 </head>
 
 <body>
@@ -58,25 +59,61 @@
                 <button id="signup-btn">Sign Up</button>
                 <a href="/login.html" id="login-link">Log In</a>
             </div>
+            <div class="zalupa"></div>
         </aside>
 
 
         <!-- === Main Content === -->
         <main class="main">
 
-            <!-- Header с названием сборки и контролами -->
             <header class="build-header">
                 <div class="build-header-left">
+                    <!-- New Build + селектор -->
                     <button id="new-build">+ New Build</button>
                     <select id="build-selector"></select>
-                    <h1 id="build-name" contenteditable="true" title="Клікніть, щоб змінити назву">
-                        New Build
-                    </h1>
-                </div>
-                <div class="build-header-right">
-                    <span id="totalPrice">₴ 0.00</span>
+
+
+
+                    <!-- Дата • Авторы -->
+
                 </div>
             </header>
+
+            <div class="build-info">
+                <!-- Информация о сборке -->
+                <div class="build-info-row">
+                    <div class="meta-build-info">
+                        <h1 id="build-name" contenteditable="true" title="Клікніть, щоб змінити назву">
+                            New Build
+                        </h1>
+                        <div class="build-meta-text">
+                            <span id="build-date">—</span> • <span id="build-author">—</span>
+                        </div>
+                    </div>
+                    <!-- Общая цена -->
+                    <div class="info-item-wrapper">
+                        <div class="info-item price">
+                            <i class="fa fa-dollar-sign"></i>
+                            <span id="totalPrice">0</span> <span> ГРН</span>
+                        </div>
+                        <!-- Совместимость (заглушка) -->
+                        <div class="info-item compatible">
+                            <i class="fa fa-check-circle"></i>
+                            <span id="compatibility">—</span>
+                        </div>
+                        <!-- Суммарный TDP -->
+                        <div class="info-item tdp">
+                            <i class="fa fa-bolt"></i>
+                            <span id="totalTdp">0</span> W
+                        </div>
+                        <!-- 3DMark (заглушка) -->
+                        <div class="info-item mark3d">
+                            <i class="fa fa-trophy"></i>
+                            <span id="mark3d">—</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <section class="parts-list">
                 <div class="part-category" data-cat="PCCase">
@@ -132,7 +169,7 @@
                     <button class="add-btn">+ Add Monitor</button>
                 </div>
             </section>
-    </div>
+        </main>
     </div>
 
     <!-- Quick Add Modal -->
@@ -146,7 +183,14 @@
                 <hr>
                 <div>
                     <h5>Price</h5>
-                    <input type="range" id="priceRange" min="0" max="20000" step="100">
+                    <div class="price-filter">
+                        <input type="range" id="priceMin" min="0" max="20000" step="100" value="0">
+                        <input type="range" id="priceMax" min="0" max="20000" step="100" value="20000">
+                        <div class="price-values">
+                            <span id="priceMinVal">$0</span>
+                            <span id="priceMaxVal">$20000</span>
+                        </div>
+                    </div>
                 </div>
             </aside>
 

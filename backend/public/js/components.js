@@ -4,7 +4,7 @@ export async function fetchProductsByCategory(category) {
   if (!token) return (location.href = "/login.html");
 
   const res = await fetch(
-    `/api/components?category=${encodeURIComponent(category)}&limit=200`,
+    `/api/components?category=${encodeURIComponent(category)}&limit=0`,
     {
       headers: { Authorization: "Bearer " + token },
     }
