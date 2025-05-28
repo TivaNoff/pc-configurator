@@ -78,6 +78,38 @@ export function initFilters() {
       applyFiltersAndRender
     );
   }
+  // Показываем/прячем блок GPU-фильтров
+  const gpuFilterBlock = document.getElementById("gpu-filters");
+  gpuFilterBlock.style.display = currentCategory === "GPU" ? "block" : "none";
+
+  if (currentCategory === "GPU") {
+    const chipsetSet = new Set();
+    const memoryTypeSet = new Set();
+    const interfaceSet = new Set();
+    const manufacturerSet = new Set();
+
+    for (const p of allProducts) {
+      const specs = p.specs || {};
+      if (specs.chipset) chipsetSet.add(specs.chipset);
+      if (specs.memory_type) memoryTypeSet.add(specs.memory_type);
+      if (specs.interface) interfaceSet.add(specs.interface);
+      if (specs.metadata?.manufacturer)
+        manufacturerSet.add(specs.metadata.manufacturer);
+    }
+
+    renderCheckboxList("chipsetFilter", chipsetSet, applyFiltersAndRender);
+    renderCheckboxList(
+      "memoryTypeFilter",
+      memoryTypeSet,
+      applyFiltersAndRender
+    );
+    renderCheckboxList("interfaceFilter", interfaceSet, applyFiltersAndRender);
+    renderCheckboxList(
+      "manufacturerFilter",
+      manufacturerSet,
+      applyFiltersAndRender
+    );
+  }
 }
 
 export function applyFiltersAndRender() {
@@ -111,6 +143,24 @@ export function applyFiltersAndRender() {
         (archs.length && !archs.includes(p.specs?.microarchitecture)) ||
         (igpus.length &&
           !igpus.includes(p.specs?.specifications?.integratedGraphics?.model))
+      ) {
+        return false;
+      }
+    }
+
+    // GPU-фильтрация
+    if (currentCategory === "GPU") {
+      const chipsets = getCheckedValues("chipsetFilter");
+      const memoryTypes = getCheckedValues("memoryTypeFilter");
+      const interfaces = getCheckedValues("interfaceFilter");
+      const manufacturers = getCheckedValues("manufacturerFilter");
+
+      if (
+        (chipsets.length && !chipsets.includes(p.specs?.chipset)) ||
+        (memoryTypes.length && !memoryTypes.includes(p.specs?.memory_type)) ||
+        (interfaces.length && !interfaces.includes(p.specs?.interface)) ||
+        (manufacturers.length &&
+          !manufacturers.includes(p.specs?.metadata?.manufacturer))
       ) {
         return false;
       }

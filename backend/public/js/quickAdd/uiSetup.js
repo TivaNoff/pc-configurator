@@ -33,3 +33,23 @@ export function setupCpuFiltersHTML() {
     .querySelector(".filter-sidebar")
     .insertAdjacentHTML("beforeend", cpuFiltersHTML);
 }
+
+// Добавляем HTML для фильтров GPU
+export function setupGpuFiltersHTML() {
+  const gpuFiltersHTML = `
+    <hr>
+    <div id="gpu-filters" style="display:none">
+      <h5>Chipset</h5>
+      <div id="chipsetFilter"></div>
+      <h5>Memory Type</h5>
+      <div id="memoryTypeFilter"></div>
+      <h5>Interface</h5>
+      <div id="interfaceFilter"></div>
+      <h5>Manufacturer</h5>
+      <div id="manufacturerFilter"></div>
+    </div>
+  `;
+  document
+    .querySelector(".filter-sidebar")
+    .insertAdjacentHTML("beforeend", gpuFiltersHTML);
+}

@@ -4,7 +4,7 @@ import { getKeySpecs } from "./helpers.js";
 import { getFilteredProducts } from "./filters.js";
 
 let currentPage = 1;
-let pageSize = 10;
+let pageSize = 20;
 let currentCategory = "";
 
 export function setPageSize(size) {
