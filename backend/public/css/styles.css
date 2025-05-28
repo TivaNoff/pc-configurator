@@ -112,9 +112,10 @@ a:hover {
   padding: 1rem;
 }
 .part-category {
-  width: 55%;
+  width: 830px;
   position: relative;
   display: flex;
+  flex-direction: column;
   align-items: center;
   gap: 0.75rem;
   padding: 1rem 0.75rem;
@@ -137,8 +138,8 @@ body > div.app > main > section > div:nth-child(13) .part-category h3 {
   font-size: 1rem;
   margin: 0;
 }
+
 .part-category .add-btn {
-  margin-left: auto;
   background: var(--accent);
   border: none;
   color: #fff;
@@ -150,49 +151,59 @@ body > div.app > main > section > div:nth-child(13) .part-category h3 {
   opacity: 0.9;
 }
 
+.swap-btn {
+  background: none !important;
+}
+
 /* Selected in build */
 .selected-part {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   margin-left: auto;
+  width: -webkit-fill-available;
 }
 .sp-thumb {
-  width: 48px;
-  height: 48px;
   object-fit: contain;
-  border: 1px solid var(--border);
   border-radius: 4px;
+  width: 5rem;
+  height: 3.5rem;
+  background: white;
+  padding: 3px;
 }
 .sp-info {
   flex: 1;
+  display: flex;
+  justify-content: space-between;
+  gap: 3.7rem;
 }
 .sp-title {
-  font-size: 0.95rem;
+  font-size: 0.9375rem;
   font-weight: 500;
+  line-height: 1.3rem;
 }
 .sp-price {
   color: var(--accent);
   font-size: 0.9rem;
   display: flex;
   align-items: center;
+  flex-direction: row-reverse;
   gap: 0.25rem;
 }
 .store-icon {
-  width: 16px;
-  height: 16px;
 }
 .sp-actions {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  height: auto;
 }
 .sp-buy {
   background: var(--accent);
   color: #fff;
-  padding: 0.3rem 0.6rem;
+  padding: 0.2rem 0.6rem;
   text-decoration: none;
-  border-radius: 3px;
+  border-radius: 8px;
 }
 .sp-buy:hover {
   opacity: 0.9;
@@ -277,6 +288,9 @@ body > div.app > main > section > div:nth-child(13) .part-category h3 {
 }
 
 .card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
   padding: 0.5rem;
 }
 
@@ -296,7 +310,8 @@ body > div.app > main > section > div:nth-child(13) .part-category h3 {
   font-size: 0.9rem;
   line-height: 1.2;
   white-space: normal;
-  margin: 0.25em 0;
+  max-height: 6rem;
+  overflow: hidden;
 }
 .card-price {
   color: var(--accent);
@@ -654,7 +669,7 @@ html {
 }
 
 .build-info {
-  padding: 0 23%;
+  width: 830px;
 }
 
 .info-item {
@@ -707,4 +722,32 @@ html {
   justify-content: space-between;
   margin-top: 30px;
   font-size: 0.9em;
+}
+
+.multiline-truncate {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  /* сколько строк оставить */
+  -webkit-line-clamp: 4;
+  overflow: hidden;
+}
+
+.multiline-truncate-part {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  /* сколько строк оставить */
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.part-category-wraper {
+  display: flex;
+  justify-content: space-between;
+  width: -webkit-fill-available;
+}
+
+.sp-buy-sec {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }

@@ -152,7 +152,7 @@ function renderProductsPage() {
           <img src="${imgUrl}" alt="${title}" onerror="this.src='/img/placeholder.png'" />
         </div>
         <div class="card-info">
-          <h4 class="card-title">${title}</h4>
+          <h4 class="card-title multiline-truncate">${title}</h4>
           <p class="card-price">${price} грн</p>
           <ul class="card-specs">${specsLi}</ul>
           <button class="add-to-build">Add to build</button>
@@ -217,7 +217,7 @@ function applyFiltersAndRender() {
 
   // фільтрація по діапазону
   const temp = allProducts.filter((p) => {
-    const price = p.prices?.Ekua;
+    const price = p.prices?.Ekua ?? 0; // якщо ціна відсутня, вважаємо 0
     if (price < minP || price > maxP) return false;
     if (compOnly.checked && p.specs?.compatible === false) return false;
     if (only3d.checked && !p.specs?.has_3d_model) return false;

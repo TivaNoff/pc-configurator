@@ -73,6 +73,23 @@ function updateTotal() {
         typeof p.specs.specifications.tdp === "number"
       ) {
         tdpVal = p.specs.specifications.tdp;
+      } else {
+        switch (p.category) {
+          case "Motherboard":
+            tdpVal = 70; // Заглушка для материнской платы
+            break;
+          case "RAM":
+            tdpVal = 28.8; // Заглушка для ОЗУ
+            break;
+          case "CPUCooler":
+            tdpVal = 15; // Заглушка для кулера
+            break;
+          case "Storage":
+            tdpVal = 10; // Заглушка для накопителей
+            break;
+          default:
+            tdpVal = 0; // Для остальных категорий
+        }
       }
       sumTdp += tdpVal;
     }
@@ -92,6 +109,7 @@ function renderPart(category, product) {
   container.querySelectorAll(".selected-part").forEach((el) => el.remove());
   const addBtn = container.querySelector(".add-btn");
   addBtn.textContent = "Swap Part";
+  addBtn.classList.add("swap-btn");
 
   const { specs, prices } = product;
   const title = getBuildTitle(specs);
@@ -106,12 +124,13 @@ function renderPart(category, product) {
     <img src="${imgUrl}" alt="${title}" class="sp-thumb"
          onerror="this.src='/img/placeholder.png'" />
     <div class="sp-info">
-      <div class="sp-title">${title}</div>
-      <div class="sp-price">${price}₴ <img src="/img/logo.svg" class="store-icon" alt="Ek"/>'</div>
-    </div>
-    <div class="sp-actions">
-      ${link ? `<a href="${link}" target="_blank" class="sp-buy">Buy</a>` : ""}
-      <button class="sp-remove" title="Remove">&times;</button>
+      <div class="sp-title multiline-truncate-part">${title}</div>
+      <div class="sp-buy-sec">
+      <div class="sp-price"> <p> ${price}₴ </p></div>
+      <div class="sp-actions"> ${
+        link ? `<a href="${link}" target="_blank" class="sp-buy">buy</a>` : ""
+      } <button class="sp-remove" title="Remove">&times;</button>
+      </div>
     </div>
   `;
   container.append(partDiv);
