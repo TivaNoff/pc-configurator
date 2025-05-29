@@ -35,7 +35,7 @@ export function renderProductsPage(products) {
         p.specs?.metadata?.name ||
         [s.manufacturer, s.series, s.model].filter(Boolean).join(" ") ||
         p.opendb_id;
-      const price = p.prices?.Ekua ?? "N/A";
+      const price = p.prices?.Ekua ?? 0;
       const imgUrl = p?.storeImg?.Ekua || "/img/placeholder.png";
       const specsLi = getKeySpecs(s, currentCategory)
         .map((e) => `<li><strong>${e.k}:</strong> ${e.v}</li>`)

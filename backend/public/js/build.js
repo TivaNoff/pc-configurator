@@ -149,12 +149,13 @@ document.body.addEventListener("click", (e) => {
     );
     const addBtn = container.querySelector(".add-btn");
     addBtn.textContent = `+ Add ${container.querySelector("h3").textContent}`;
+    addBtn.classList.remove("swap-btn");
     updateTotal();
     window.dispatchEvent(new Event("buildUpdated"));
   }
   // Swap снова открывает QuickAdd
   if (
-    e.target.matches(".add-btn") &&
+    e.target.matches(".swap-btn") &&
     selectedParts[e.target.closest(".part-category").dataset.cat]
   ) {
     overlay.classList.add("active");
@@ -287,6 +288,8 @@ buildName.addEventListener("blur", async () => {
     },
     body: JSON.stringify({ name: newName }),
   });
+  loadBuild(buildSelector.value);
+  loadBuildList();
 });
 
 // --- Авто-сохранение ---

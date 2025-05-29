@@ -15,6 +15,54 @@ import {
   setCurrentCategory as setFlowCategory,
 } from "./productFlow.js";
 
+// ---------------------------------------------
+// функция для открытия модального окна с детальной информацией по товару
+function showProductDetails(product) {
+  const s = product.specs || {};
+  const title =
+    product.specs?.metadata?.name ||
+    [s.manufacturer, s.series, s.model].filter(Boolean).join(" ") ||
+    product.opendb_id;
+  const imgUrl = product?.storeImg?.Ekua || "/img/placeholder.png";
+
+  // создаём затемнённый фон
+  const detailOverlay = document.createElement("div");
+  detailOverlay.classList.add("detail-overlay");
+  detailOverlay.id = "detailOverlay";
+
+  // создаём само окно
+  const detailModal = document.createElement("div");
+  detailModal.classList.add("modal", "detail-modal");
+  // собираем все характеристики в список
+  const specsList = Object.entries(s)
+    .flatMap(([key, value]) => {
+      if (value && typeof value === "object") {
+        return Object.entries(value).map(
+          ([k, v]) => `<li><strong>${k}:</strong> ${v}</li>`
+        );
+      }
+      return `<li><strong>${key}:</strong> ${value}</li>`;
+    })
+    .join("");
+  detailModal.innerHTML = `
+    <button class="modal-close" id="closeDetail">✕</button>
+    <img src="${imgUrl}" alt="${title}" class="detail-overlay-img">
+    <h3>${title}</h3>
+    <ul>${specsList}</ul>
+  `;
+  detailOverlay.appendChild(detailModal);
+  document.body.appendChild(detailOverlay);
+
+  // закрытие модалки
+  detailModal
+    .querySelector("#closeDetail")
+    .addEventListener("click", () => detailOverlay.remove());
+  detailOverlay.addEventListener("click", (e) => {
+    if (e.target === detailOverlay) detailOverlay.remove();
+  });
+}
+// ---------------------------------------------
+
 export function setupListeners() {
   const overlay = document.getElementById("quickAddOverlay");
   const grid = document.getElementById("productsGrid");
@@ -85,9 +133,7 @@ export function setupListeners() {
       window.dispatchEvent(
         new CustomEvent("add-component", {
           detail: {
-            category:
-              document.querySelector(".part-category.selected")?.dataset.cat ||
-              "",
+            category: product.category || "",
             product,
           },
         })
@@ -96,5 +142,37 @@ export function setupListeners() {
       window.dispatchEvent(new Event("buildUpdated"));
       overlay.classList.remove("active");
     }
+  });
+
+  grid.addEventListener("click", (e) => {
+    const cardEl = e.target.closest(".card-title");
+    if (cardEl && !e.target.closest(".add-to-build")) {
+      const id = cardEl.dataset.id;
+      const product = getFilteredProducts().find((p) => p.opendb_id === id);
+      if (product) showProductDetails(product);
+      return;
+    }
+    if (e.target.matches(".add-to-build")) {
+      const id = e.target.closest(".card").dataset.id;
+      const product = getFilteredProducts().find((p) => p.opendb_id === id);
+      window.dispatchEvent(
+        new CustomEvent("add-component", {
+          detail: { category: product.category || "", product },
+        })
+      );
+      window.dispatchEvent(new Event("buildUpdated"));
+      overlay.classList.remove("active");
+    }
+  });
+
+  grid.addEventListener("click", (e) => {
+    const cardEl = e.target.closest(".card");
+    if (cardEl && !e.target.closest(".add-to-build")) {
+      const id = cardEl.dataset.id;
+      const product = getFilteredProducts().find((p) => p.opendb_id === id);
+      if (product) showProductDetails(product);
+      return;
+    }
+    // ... остальной код
   });
 }
